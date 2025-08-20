@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>حاسبة المعدل | SGPA & GPA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F0F4F8;
+      --card: #FFFFFF;
+      --text: #22313F;
+      --muted: #6B7C93;
+      --primary: #1976D2;
+      --primary-dark: #1565C0;
+      --accent: #1E88E5;
+      --danger: #D32F2F;
+      --success: #2E7D32;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Tajawal", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); }
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    header { text-align: center; margin: 24px 0 12px; }
+    .title { font-weight: 800; font-size: 32px; color: #344955; margin: 0; }
+    .subtitle { color: var(--muted); margin-top: 6px; }
+
+    .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }
+    .grid { display: grid; gap: 16px; }
+
+    .home-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 18px; }
+    .btn { cursor: pointer; border: none; border-radius: 14px; padding: 12px 18px; font-weight: 700; font-size: 16px; color: white; background: var(--primary); transition: transform .04s ease, background .2s ease; }
+    .btn:hover { background: var(--primary-dark); }
+    .btn:active { transform: translateY(1px); }
+    .btn.secondary { background: #90A4AE; }
+    .btn.ghost { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .toolbar .left, .toolbar .right { display: flex; gap: 10px; align-items: center; }
+
+    select, input[type="number"], input[type="text"] { width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid #E2E8F0; background: #FAFCFF; font-size: 15px; outline: none; transition: border .2s ease, box-shadow .2s ease; }
+    select:focus, input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(30,136,229,0.15); }
+
+    .section-title { font-size: 18px; font-weight: 800; color: var(--accent); margin: 16px 4px 8px; }
+    .row { display: grid; grid-template-columns: 1fr 220px; gap: 12px; align-items: center; }
+    .row .subject-label { background: #F8FAFF; padding: 12px; border-radius: 12px; border: 1px dashed #DCE6F5; font-weight: 700; }
+
+    .sticky-footer { position: sticky; bottom: 0; background: linear-gradient(180deg, rgba(240,244,248,0.4), var(--bg)); padding-top: 8px; }
+    .result { font-size: 18px; font-weight: 800; color: var(--accent); }
+    .muted { color: var(--muted); }
+
+    .scroll { max-height: 58vh; overflow: auto; padding: 8px; border-radius: 12px; border: 1px solid #E6EEF7; background: #fff; }
+
+    .footer { text-align: center; color: var(--muted); margin-top: 16px; }
+    .badge { display: inline-block; background: #E3F2FD; color: var(--primary-dark); padding: 4px 10px; border-radius: 999px; font-weight: 700; font-size: 12px; }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 class="title">Hi I am Yousef — Welcome to GPA Calculator System</h1>
+      <div class="subtitle">نسخة ويب  لحساب <b>SGPA</b> و<b>GPA</b></div>
+    </header>
+
+    <!-- Home / Mode Selector -->
+    <section id="home" class="card">
+      <div class="grid">
+        <div class="badge">اختر الوضع</div>
+        <div class="home-actions">
+          <button class="btn" onclick="showView('sgpa')">SGPA Calculator</button>
+          <button class="btn" onclick="showView('gpa')">GPA Calculator</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SGPA Calculator View -->
+    <section id="sgpa" class="card hidden">
+      <div class="toolbar">
+        <div class="left">
+          <button class="btn ghost" onclick="showView('home')">رجوع</button>
+          <span class="muted">احسب معدل التيرم حسب المواد الأساسية والتخصص</span>
+        </div>
+        <div class="right">
+          <label class="muted" for="specialization">اختر التخصص:</label>
+          <select id="specialization" onchange="updateSpecializedSubjects()">
+            <option selected disabled>اختر التخصص</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="scroll" id="sgpaArea"></div>
+
+      <div class="sticky-footer grid" style="grid-template-columns: 1fr auto auto auto; gap: 10px; align-items: center;">
+        <div class="result" id="sgpaResult">لم يتم الحساب بعد</div>
+        <button class="btn" onclick="calculateSGPA()">احسب الـ GPA</button>
+        <button class="btn secondary" onclick="copySGPA()">نسخ الـ GPA</button>
+        <button class="btn ghost" onclick="resetSGPA()">تفريغ</button>
+      </div>
+    </section>
+
+    <!-- GPA (Cumulative) View -->
+    <section id="gpa" class="card hidden">
+      <div class="toolbar">
+        <div class="left">
+          <button class="btn ghost" onclick="showView('home')">رجوع</button>
+          <span class="muted">ادمج معدلك القديم مع تقديرات المواد الجديدة</span>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns: repeat(auto-fit,minmax(220px,1fr));">
+        <div>
+          <label>المعدل التراكمي القديم</label>
+          <input id="oldGpa" type="number" step="0.01" min="0" max="4" placeholder="مثال: 3.25">
+        </div>
+        <div>
+          <label>عدد الوحدات القديمة</label>
+          <input id="oldHours" type="number" step="1" min="0" placeholder="مثال: 90">
+        </div>
+        <div>
+          <label>عدد المقررات الجديدة</label>
+          <select id="newCount" onchange="renderNewCourses()">
+            <option selected disabled>اختر</option>
+            <option>4</option>
+            <option>5</option>
+            <option>6</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="newCourses" class="grid" style="margin-top: 10px;"></div>
+
+      <div class="sticky-footer grid" style="grid-template-columns: 1fr auto; gap: 10px; align-items: center;">
+        <div class="result" id="gpaResult"></div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn" onclick="calculateNewGPA()">احسب المعدل التراكمي الجديد</button>
+          <button class="btn ghost" onclick="resetGPA()">تفريغ</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">Developed by <b>YOUSEF A. EL3SAILLY</b></div>
+  </div>
+
+  <script>
+    // ====== Data (same mapping as your Tkinter app) ======
+    const GRADE_TO_GPA = {
+      "+A": 4.0,
+      "A": 3.7,
+      "+B": 3.3,
+      "B": 3.0,
+      "+C":2.7,
+      "C": 2.3,
+      "+D": 2.2,
+      "D": 2.0,
+      "F": 0.0
+    };
+
+    const LEVEL_SUBJECTS = {
+      "المستوى الأول": {
+        "الفصل الدراسي الأول": [
+          "مبادئ ادارة الاعمال",
+          "مبادئ الاقتصاد",
+          "مبادي المحاسبة المالية",
+          "مبادئ القانون",
+          "لغة اجنبية 1"
+        ],
+        "الفصل الدراسي الثاني": [
+          "علم نفس",
+          "سلوك تنظيمي",
+          "تفكير ابتكاري",
+          "حقوق الانسان",
+          "رياضيات الاعمال",
+          "طرق ومهارات الاتصال"
+        ]
+      },
+      "المستوى الثاني": {
+        "الفصل الدراسي الأول": [
+          "محاسبة تكاليف",
+          "اقتصاد جزئي",
+          "ادارة اللوجيستيات",
+          "قانون تجاري",
+          "مبادئ تسويق"
+        ],
+        "الفصل الدراسي الثاني": [
+          "نظم معلومات ادارية",
+          "محاسبة ادارية",
+          "اقتصاد كلي",
+          "ادارة الانتاج",
+          "لغة اجنبية 2",
+          "الادارة المالية"
+        ]
+      },
+      "المستوى الثالث": {
+        "الفصل الدراسي الأول": [
+          "الاحصاء التطبيقي",
+          "اعداد وتحليل التقارير المالية",
+          "ادارة الجودة الشاملة",
+          "مبادئ الاستثمار"
+        ],
+        "الفصل الدراسي الثاني": [
+          "الاعمال الالكترونية",
+          "تطبيقات الحاسب",
+          "ريادة الاعمال والمشروعات الصغيرة",
+          "الادارة الاستراتيجية"
+        ]
+      },
+      "المستوى الرابع": {
+        "الفصل الدراسي الأول": [
+          "تحليلات الاعمال",
+          "ادارة الموارد البشرية"
+        ],
+        "الفصل الدراسي الثاني": [
+          "الاساليب الكمية واتخاذ القرارات",
+          "المالية العامة"
+        ]
+      }
+    };
+
+    const SPECIALIZED_SUBJECTS = {
+      "نظم معلومات": [
+        "تصميم برامج الحاسب",
+        "قواعد البيانات",
+        "تحليل وتصميم نظم المعلومات",
+        "البنية التحتية لتكنولوجيا المعلومات",
+        "تحليلات الاعمال والتنقيب عن البيانات",
+        "انظمة معلومات المؤسسات",
+        "تطبيقات الانترنت والوسائط المتعددة",
+        "تطبيقات في برمجة الحاسب الالي",
+        "استراتيجية نظم المعلومات",
+        "ادارة مشروعات النظم",
+        "نظم معلومات محاسبية",
+        "دراسة جدوي المشروعات"
+      ],
+      "تسويق": [
+        "تسويق الخدمات",
+        "ادارة التسويق",
+        "التسويق الدولي",
+        "الاتصالات التسويقية المتكاملة",
+        "بحوث التسويق",
+        "سلوك المستهلك",
+        "التسويق الرقمي",
+        "ادارة المنتجات الجديدة",
+        "اخلاقيات الاعمال والحوكمة",
+        "المنشات التسويقية",
+        "نظم المعلومات التسويقية",
+        "اقتصاديات النقود والبنوك",
+        "دراسة جدوي المشروعات"
+      ],
+      "محاسبة ومراجعة": [
+        "المحاسبة المالية المتقدمة",
+        "المحاسبة المتوسطة 1",
+        "المحاسبة المتوسطة 2",
+        "المحاسبة الضريبية",
+        "المراجعة",
+        "نظم المعلومات المحاسبية",
+        "اخلاقيات الاعمال والحوكمة",
+        "نظم تكاليف",
+        "اقتصاديات النقود والبنوك",
+        "المحاسبة في المنشات المتخصصة",
+        "تحليل وتقييم الشركات",
+        "مراجعة النظم الاكترونية",
+        "دراسة جدوي المشروعات"
+      ],
+      "إدارة الأعمال": [
+        "اخلاقيات الاعمال والحوكمة",
+        "ادارة التغيير",
+        "تنمية وتدريب الموارد البشرية",
+        "الادارة الاسراتيجية للموارد البشرية",
+        "دراسة جدوي المشروعات",
+        "اقتصاديات الادارة",
+        "انظمة معلومات المؤسسات",
+        "ادارة الاعمال الدولية",
+        "ادارة المشروعات",
+        "اقتصاديات النقود والبنوك",
+        "الاتصالات التسويقية المتكاملة",
+        "ادارة التسويق",
+        "التسويق الدولي",
+        "التسويق الرقمي",
+        "ادارة مالية متقدمة",
+        "المراجعة",
+        "التمويل الدولي"
+      ],
+      "اقتصاديات التجارة الدولية": [
+        "نظرية التجارة الدولية",
+        "العلاقات الاقتصادية الدولية",
+        "التخطيط والتنمية الاقتصادية",
+        "نظم التصدير والاستيراد",
+        "علاقات دولية ونظم دبلوماسية",
+        "اقتصاديات النقود والبنوك",
+        "التكتلات الاقتصادية والدولية",
+        "التقلبات الاقتصادية ومشكلات التجارة الدولية",
+        "دراسة جدوي المشروعات"
+      ]
+    };
+
+    // ====== Helpers ======
+    function $(id) { return document.getElementById(id); }
+    function create(el, props = {}, children = []) {
+      const e = document.createElement(el);
+      Object.assign(e, props);
+      children.forEach(c => e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c));
+      return e;
+    }
+
+    function showView(view) {
+      ["home","sgpa","gpa"].forEach(v => $(v).classList.add("hidden"));
+      $(view).classList.remove("hidden");
+      if (view === 'sgpa') ensureSGPAUi();
+    }
+
+    // ====== SGPA UI Build ======
+    let sgpaBuilt = false;
+    let specializedCombos = []; // last 11 selects (specialized subjects)
+
+    function ensureSGPAUi() {
+      if (sgpaBuilt) return;
+      // fill specialization options
+      const specSel = $("specialization");
+      Object.keys(SPECIALIZED_SUBJECTS).forEach(k => {
+        const opt = create('option', { value: k, textContent: k });
+        specSel.appendChild(opt);
+      });
+
+      const area = $("sgpaArea");
+
+      // render levels and semesters
+      for (const [level, semesters] of Object.entries(LEVEL_SUBJECTS)) {
+        area.appendChild(create('div', { className: 'section-title', textContent: `مواد ${level}` }));
+        for (const [semester, subjects] of Object.entries(semesters)) {
+          area.appendChild(create('div', { className: 'section-title', textContent: semester }));
+          subjects.forEach(subj => area.appendChild(subjectRow(subj, true)));
+        }
+      }
+
+      // specialized section header
+      area.appendChild(create('div', { className: 'section-title', textContent: 'مواد التخصص حسب تخصص الطالب' }));
+
+      // create 11 specialized selectable subjects
+      for (let i = 0; i < 11; i++) {
+        area.appendChild(subjectRow('اختر المادة حسب تخصصك', false, true));
+      }
+
+      sgpaBuilt = true;
+    }
+
+    function subjectRow(subjectName, locked = false, isSpecialized = false) {
+      const wrap = create('div', { className: 'row' });
+
+      let labelEl;
+      if (isSpecialized) {
+        // will be replaced by a select later
+        labelEl = create('select');
+        labelEl.appendChild(create('option', { textContent: 'اختر المادة حسب تخصصك', value: '' }));
+      } else {
+        labelEl = create('div', { className: 'subject-label', textContent: subjectName });
+      }
+
+      const gradeSel = create('select');
+      gradeSel.appendChild(create('option', { textContent: 'اختر التقدير', value: '' }));
+      Object.keys(GRADE_TO_GPA).forEach(g => gradeSel.appendChild(create('option', { value: g, textContent: g })));
+
+      wrap.appendChild(labelEl);
+      wrap.appendChild(gradeSel);
+
+      if (isSpecialized) specializedCombos.push(labelEl);
+      return wrap;
+    }
+
+    function updateSpecializedSubjects() {
+      const spec = $("specialization").value;
+      const list = SPECIALIZED_SUBJECTS[spec] || [];
+      specializedCombos.forEach(sel => {
+        // clear and refill
+        sel.innerHTML = '';
+        sel.appendChild(create('option', { textContent: 'اختر المادة حسب تخصصك', value: '' }));
+        list.forEach(s => sel.appendChild(create('option', { value: s, textContent: s })));
+        sel.value = '';
+      });
+    }
+
+    function calculateSGPA() {
+      const rows = $("sgpaArea").querySelectorAll('.row');
+      let totalPoints = 0, totalCredits = 0;
+
+      rows.forEach(row => {
+        const left = row.children[0];
+        const gradeSel = row.children[1];
+        const subjectName = left.tagName === 'DIV' ? left.textContent.trim() : (left.value || '').trim();
+        const grade = gradeSel.value.trim();
+
+        if (!grade || !subjectName || subjectName === 'اختر المادة حسب تخصصك') return;
+        if (!(grade in GRADE_TO_GPA)) return;
+
+        totalPoints += GRADE_TO_GPA[grade] * 3; // each course = 3 credits
+        totalCredits += 3;
+      });
+
+      const resultEl = $("sgpaResult");
+      if (totalCredits === 0) {
+        resultEl.textContent = 'لم يتم الحساب بعد';
+        resultEl.style.color = 'var(--danger)';
+        return;
+      }
+
+      const gpa = Math.round((totalPoints / totalCredits) * 100) / 100;
+      resultEl.textContent = `المعدل (GPA): ${gpa}`;
+      resultEl.style.color = 'var(--accent)';
+      // store for copy
+      resultEl.dataset.value = gpa;
+    }
+
+    async function copySGPA() {
+      const val = $("sgpaResult").dataset.value;
+      if (!val) { alert('يرجى حساب المعدل أولًا!'); return; }
+      try { await navigator.clipboard.writeText(val); alert('تم نسخ المعدل إلى الحافظة!'); } catch(e) { alert('تعذر النسخ تلقائيًا، انسخ يدويًا: ' + val); }
+    }
+
+    function resetSGPA() {
+      // reset all selects inside sgpaArea
+      $("sgpaArea").querySelectorAll('select').forEach(sel => sel.value = '');
+      $("sgpaResult").textContent = 'لم يتم الحساب بعد';
+      $("sgpaResult").style.color = 'var(--accent)';
+      $("specialization").value = 'اختر التخصص';
+    }
+
+    // ====== GPA (Cumulative) ======
+    function renderNewCourses() {
+      const count = parseInt($("newCount").value);
+      const host = $("newCourses");
+      host.innerHTML = '';
+      if (!count || isNaN(count)) return;
+      for (let i = 0; i < count; i++) {
+        const row = create('div', { className: 'grid', style: 'grid-template-columns: 140px 1fr; gap: 12px; align-items:center;' });
+        row.appendChild(create('div', { className: 'subject-label', textContent: `المادة ${i+1}` }));
+        const gradeSel = create('select');
+        gradeSel.appendChild(create('option', { value: '', textContent: 'اختر التقدير' }));
+        Object.keys(GRADE_TO_GPA).forEach(g => gradeSel.appendChild(create('option', { value: g, textContent: g })));
+        row.appendChild(gradeSel);
+        host.appendChild(row);
+      }
+    }
+
+    function calculateNewGPA() {
+      const oldGpa = parseFloat($("oldGpa").value);
+      const oldHours = parseInt($("oldHours").value);
+      if (isNaN(oldGpa) || isNaN(oldHours)) { alert('يرجى إدخال بيانات صحيحة'); return; }
+
+      const gradeSels = $("newCourses").querySelectorAll('select');
+      let newPoints = 0; const newHours = gradeSels.length * 3; // 3 credits each
+      for (let i = 0; i < gradeSels.length; i++) {
+        const g = gradeSels[i].value.trim();
+        if (!(g in GRADE_TO_GPA)) { alert(`يرجى اختيار تقدير صحيح للمادة ${i+1}`); return; }
+        newPoints += GRADE_TO_GPA[g] * 3;
+      }
+
+      const totalPoints = oldGpa * oldHours + newPoints;
+      const totalHours = oldHours + newHours;
+      const newGpa = Math.round((totalPoints / totalHours) * 100) / 100;
+      $("gpaResult").textContent = `المعدل التراكمي الجديد: ${newGpa}`;
+    }
+
+    function resetGPA() {
+      $("oldGpa").value = '';
+      $("oldHours").value = '';
+      $("newCount").value = 'اختر';
+      $("newCourses").innerHTML = '';
+      $("gpaResult").textContent = '';
+    }
+
+    // initial
+    showView('home');
+  </script>
+</body>
+</html>
